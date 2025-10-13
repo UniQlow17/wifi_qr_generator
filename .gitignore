@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.idea/
+
+# Flask
+instance/
+.flaskenv
+
+# Logs and databases
+*.log
+*.db
+/database.db
+
+# Environment variables
+.env
+.flaskenv
+
+# Testing
+.pytest_cache/
