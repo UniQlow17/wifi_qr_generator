@@ -1,0 +1,69 @@
+name: Build and release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset_name: wifi_qr_generator-windows.exe
+            build_path: dist/wifi_qr_generator.exe
+          - os: macos-latest
+            asset_name: wifi_qr_generator-macos
+            build_path: dist/wifi_qr_generator
+          - os: ubuntu-latest
+            asset_name: wifi_qr_generator-linux
+            build_path: dist/wifi_qr_generator
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.11'
+
+      - name: Install system Tk/GUI dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
+
+      - name: Install dependencies
+        run: uv sync --group build
+
+      - name: Build executable
+        run: >
+          uv run pyinstaller --onefile --windowed --name wifi_qr_generator
+          --collect-all customtkinter
+          main.py
+
+      - name: Rename artifact
+        shell: bash
+        run: cp "${{ matrix.build_path }}" "${{ matrix.asset_name }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*

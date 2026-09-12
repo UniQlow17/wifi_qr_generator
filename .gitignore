@@ -9,10 +9,6 @@ venv/
 .venv/
 .idea/
 
-# Flask
-instance/
-.flaskenv
-
 # Logs and databases
 *.log
 *.db
@@ -20,7 +16,11 @@ instance/
 
 # Environment variables
 .env
-.flaskenv
 
 # Testing
 .pytest_cache/
+
+# PyInstaller build output
+build/
+dist/
+*.spec
